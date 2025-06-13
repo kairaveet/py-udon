@@ -25,7 +25,7 @@ def unique_marker_finder(input_df, groups):
 
     markers_df = markers_df.sort_values(by=["top_cluster", "pearson_r"], ascending=[True, False])
 
-    return markers_df
+    return corr_df, markers_df
 
 
 def create_final_marker_heatmap(input_df, markers_df, groups_df):
@@ -72,7 +72,7 @@ def scale_final_marker_heatmap(final_marker_heatmap):
 def marker_finder_wrapper(input_df, groups, top_n=60, rho_threshold=0.2, marker_finder_rho=0.3):
 
     # get unique markers
-    markers_df_og = unique_marker_finder(input_df, groups)
+    corr_df, markers_df_og = unique_marker_finder(input_df, groups)
     markers_df_og.index = markers_df_og['marker']
     markers_df = markers_df_og.copy()
 
@@ -91,7 +91,7 @@ def marker_finder_wrapper(input_df, groups, top_n=60, rho_threshold=0.2, marker_
     # create an output similar to FinalMarkerHeatmap file
     final_marker_heatmap = create_final_marker_heatmap(input_df, markers_df=markers_df, groups_df=groups)
 
-    return markers_df_og, markers_df, final_marker_heatmap
+    return markers_df_og, markers_df, final_marker_heatmap, corr_df
 
 
 def marker_finder(input_df, groups):

@@ -47,7 +47,7 @@ def clustering_wrapper(adata, output_filename, rank=None, min_group_size=3, top_
 
     start_time = time.time()
     print("Finding marker genes per cluster...")
-    markers_df_og, markers_df, marker_heatmap = marker_finder_wrapper(input_df=fold_matrix.transpose(), groups=nmf_clusters, top_n=top_n_genes, rho_threshold=rho_threshold, marker_finder_rho=marker_finder_rho)
+    markers_df_og, markers_df, marker_heatmap, corr_df = marker_finder_wrapper(input_df=fold_matrix.transpose(), groups=nmf_clusters, top_n=top_n_genes, rho_threshold=rho_threshold, marker_finder_rho=marker_finder_rho)
     print("--- %s seconds ---" % (time.time() - start_time))
 
     adata.uns['clusters_preSVM'] = nmf_clusters
@@ -88,7 +88,7 @@ def clustering_wrapper(adata, output_filename, rank=None, min_group_size=3, top_
 
     start_time = time.time()
     print("Finding final marker genes per cluster...")
-    markers_df_og, markers_df, marker_heatmap = marker_finder_wrapper(input_df=fold_matrix.transpose(),
+    markers_df_og, markers_df, marker_heatmap, corr_df = marker_finder_wrapper(input_df=fold_matrix.transpose(),
                                                                       groups=final_clusters, top_n=top_n_genes,
                                                                       rho_threshold=rho_threshold, marker_finder_rho=marker_finder_rho)
     print("--- %s seconds ---" % (time.time() - start_time))
@@ -118,9 +118,10 @@ def clustering_wrapper(adata, output_filename, rank=None, min_group_size=3, top_
         marker_heatmap.to_csv(mf_heatmap_path, sep="\t")
         final_clusters.to_csv(final_clusters_path, sep="\t")
 
-    return adata
+    return adata, corr_df, basis_matrix
 
 
+### Not up to date with the other code (e.g. clustering_wrappper doesn't return marker genes?)
 def find_udon_clusters(adata, output_filename, species, gtf_file_path=None, fold_threshold=1, samples_differing=3, intercorr_threshold=0.4, corr_n_events=5, pca_corr_threshold=0.4, n_components=30, rank=None, min_group_size=3, delta=0.1, p_val=0.05, min_differential_genes=100, top_n_differential_genes=150):
 
     print("beginning feature selection...")

@@ -367,4 +367,136 @@ def plot_markers_df_subplots(marker_heatmap, markers_df, clusters, groups_to_col
         print("Warning! Failed to run plot_markers_df. See above Exception.")
 
 
+def plot_NMFbased_UMAP(basis_matrix, path_to_save_figure, n_U_neighbors=15):
+    """NMF/
+    Takes an NMF basis matrix (components x samples) and plots a UMAP with dots
+        colored by cell type (each dot refers to a Diseased SampleID-CT pair for UDON)
+    Arguments
+    ---------
+    basis_matrix: Matrix where rows = NMF components and columns = samples from NMF
+        (e.g. basis_matrix output from clustering_wrapper)
+        NOTE: The sample names have to follow trend of CELLTYPE_SAMPLEID
+    path_to_save_figure: Path where figure will be saved as a pdf
+    n_U_neighbors: Value used as n_neighbors input for umap.UMAP
+    
+    Returns
+    ---------
+    None (plot)
+    """
+    try:
+        # Transpose basis matrix (components x samples) to make rows = samples
+        X = basis_matrix.T  # Now shape: (n_samples, n_components)   
 
+        # Extract cell types from sample names
+        umap_df = pd.DataFrame(X.index, columns=['sample'])
+        umap_df['cell_type'] = umap_df['sample'].str.split('_').str[0] 
+
+        # Run UMAP
+        reducer = umap.UMAP(n_neighbors=n_U_neighbors, min_dist=0.1, metric='euclidean', random_state=42)
+        embedding = reducer.fit_transform(X)  
+        # Add UMAP coordinates
+        umap_df['UMAP1'] = embedding[:, 0]
+        umap_df['UMAP2'] = embedding[:, 1]
+
+        # Plot
+        plt.figure(figsize=(10, 6))
+        sns.scatterplot(data=umap_df, x='UMAP1', y='UMAP2', hue='cell_type', palette='tab10', s=40, alpha=0.8)
+        plt.title("NMF-based UMAP Colored by Cell Type")
+        plt.xlabel("UMAP1")
+        plt.ylabel("UMAP2")
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()
+
+        # Save the figure with compression
+        plt.savefig(path_to_save_figure, dpi=200, bbox_inches='tight', format="pdf", pad_inches=0.9)
+    except Exception as e:
+        print(str(e))
+        print("Warning! Failed to run plot_NMFbased_UMAP. See above Exception.")
+
+def plot_top_marker_heatmap(markers_df, corr_df, path_to_save_figure, 
+top_n=10, figsize=(10, 12), cmap='bwr'):
+    """
+    Plot heatmap of top markers by lowest p-value per cluster, using Pearson r from corr_df.
+
+    Arguments
+    ----------
+    markers_df : pd.DataFrame
+        Must contain: ['marker', 'top_cluster', 'pearson_r', 'p_value']
+    corr_df : pd.DataFrame
+        Genes (rows) × clusters (columns), with Pearson r values
+    top_n : int
+        Number of top markers per cluster
+    figsize : tuple
+        Heatmap figure size
+    cmap : str
+        Colormap for heatmap (e.g. 'Spectral', 'coolwarm')
+    """
+    
+    required_cols = {'marker', 'top_cluster', 'pearson_r', 'p_value'}
+    if not required_cols.issubset(markers_df.columns):
+        raise ValueError(f"markers_df must have columns: {required_cols}")
+    
+    try:
+        # Step 1: Get top N markers per cluster
+        top_markers_df = (
+            markers_df
+            .sort_values(['top_cluster', 'p_value'])
+            .groupby('top_cluster')
+            .head(top_n)
+        )
+
+        unique_markers = top_markers_df['marker'].unique()
+
+        # Step 2: Use the cluster-sorted marker list as row order
+        ordered_markers = top_markers_df['marker'].values
+
+        # Step 3: Filter correlation data
+        heatmap_df = corr_df.loc[corr_df.index.intersection(ordered_markers)]
+
+        # Ensure markers are ordered as in ordered_markers
+        heatmap_df = heatmap_df.loc[ordered_markers]
+
+        # Drop rows with all NaNs
+        heatmap_df = heatmap_df.dropna(how='all')
+        if heatmap_df.empty:
+            raise ValueError("Heatmap matrix is empty after filtering.")
+
+        # Plot using sns.heatmap
+        plt.figure(figsize=figsize)
+        ax = sns.heatmap(
+            heatmap_df,
+            cmap=cmap,
+            vmin=-1,
+            vmax=1,
+            xticklabels=True,
+            yticklabels=True,
+            cbar_kws={"label": "Pearson r"},
+            linewidths=0.3,
+            linecolor="black"
+        )
+
+        # Clean up axis labels and title
+        ax.set_xlabel("Cluster")
+        ax.set_ylabel("Top Markers")
+        ax.set_title(f"Top {top_n} Markers per Cluster by Pearson R^2", pad=20)
+        ax.grid(False)
+        ax.set_yticklabels(ax.get_yticklabels(), fontsize=10)
+
+        # Shrink colorbar
+        colorbar = ax.collections[0].colorbar
+        colorbar.ax.tick_params(labelsize=8)  # Smaller font on colorbar ticks
+        colorbar.ax.set_ylabel("Pearson R^2", fontsize=10)
+        # Resize colorbar dimensions
+        colorbar.ax.set_aspect(30) 
+
+        # Remove border spines (optional)
+        for _, spine in ax.spines.items():
+            spine.set_visible(False)
+
+        plt.tight_layout()
+
+        # Save the figure with compression
+        plt.savefig(path_to_save_figure, dpi=200, bbox_inches='tight', format="pdf", pad_inches=0.9)
+    except Exception as e:
+        print(str(e))
+        print("Warning! Failed to run plot_top_marker_heatmap. See above Exception.")
