@@ -130,18 +130,21 @@ def pca_feature_selection(adata, corr_threshold=0.4, n_components=30):
 
 
 def feature_selection_wrapper(adata, species, gtf_file_path=None, fold_threshold=1, samples_differing=3, intercorr_threshold=0.4, 
-corr_n_events=5, pca_corr_threshold=0.4, n_components=30):
-    # identify_protein_coding_genes
-    print("Identifying protein coding genes...")
-    adata = identify_protein_coding_genes(adata, species=species, gtf_file_path=gtf_file_path)
+corr_n_events=5, pca_corr_threshold=0.4, n_components=30, protein_cod_file=None):
+    if protein_cod_file:
+        # identify_protein_coding_genes
+        print("Identifying protein coding genes...")
+        adata = identify_protein_coding_genes(adata, species=species, gtf_file_path=gtf_file_path, protein_cod_file=protein_cod_file)
 
-    print("before protein coding genes")
-    print(adata.shape[1])
-    # filter_out_non_coding_genes
-    print("Filtering out non-coding genes...")
-    adata = filter_out_non_coding_genes(adata)
-    print("after protein coding genes")
-    print(adata.shape[1])
+        print("before protein coding genes")
+        print(adata.shape[1])
+        # filter_out_non_coding_genes
+        print("Filtering out non-coding genes...")
+        adata = filter_out_non_coding_genes(adata)
+        print("after protein coding genes")
+        print(adata.shape[1])
+    else:
+        print("Skipping filtering for protein-coding genes")
 
     # variance_based_feature_selection
     print("Performing variance-based feature selection...")
@@ -171,7 +174,7 @@ corr_n_events=5, pca_corr_threshold=0.4, n_components=30):
     return adata
 
 
-def identify_protein_coding_genes(adata, species, gtf_file_path=None):
+def identify_protein_coding_genes(adata, species, gtf_file_path=None, protein_cod_file=None):
 
     # read gtf file
     if gtf_file_path is not None:
@@ -185,7 +188,7 @@ def identify_protein_coding_genes(adata, species, gtf_file_path=None):
                                                                           expand=False).dropna().unique()
 
     else:
-        gtf_df = pd.read_csv('ProteinCoding-Hs-Mm.txt', sep="\t", names=["GeneName"])
+        gtf_df = pd.read_csv(protein_cod_file, sep="\t", names=["GeneName"])
         # Filter based on species
         if species == "Hs":
             # Filter uppercase entries or those starting with "ENSG"

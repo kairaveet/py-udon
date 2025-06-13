@@ -366,11 +366,10 @@ def plot_markers_df_subplots(marker_heatmap, markers_df, clusters, groups_to_col
         print(str(e))
         print("Warning! Failed to run plot_markers_df. See above Exception.")
 
-
 def plot_NMFbased_UMAP(basis_matrix, path_to_save_figure, n_U_neighbors=15):
     """NMF/
     Takes an NMF basis matrix (components x samples) and plots a UMAP with dots
-        colored by cell type (each dot refers to a Diseased SampleID-CT pair for UDON)
+        colored by cell type and SampleID (each dot refers to a Diseased SampleID-CT pair for UDON)
     Arguments
     ---------
     basis_matrix: Matrix where rows = NMF components and columns = samples from NMF
@@ -389,7 +388,64 @@ def plot_NMFbased_UMAP(basis_matrix, path_to_save_figure, n_U_neighbors=15):
 
         # Extract cell types from sample names
         umap_df = pd.DataFrame(X.index, columns=['sample'])
-        umap_df['cell_type'] = umap_df['sample'].str.split('_').str[0] 
+        split_sample = umap_df['sample'].str.split('__')
+        umap_df['cell_type'] = split_sample.str[0] 
+        umap_df['sampleid'] = split_sample.str[1] 
+        print(umap_df.iloc[0:4,])
+
+        # Run UMAP
+        reducer = umap.UMAP(n_neighbors=n_U_neighbors, min_dist=0.1, metric='euclidean', random_state=42)
+        embedding = reducer.fit_transform(X)  
+        # Add UMAP coordinates
+        umap_df['UMAP1'] = embedding[:, 0]
+        umap_df['UMAP2'] = embedding[:, 1]
+
+
+        # Plot
+        plt.figure(figsize=(10, 6))
+        ax2 = sns.scatterplot(data=umap_df, x='UMAP1', y='UMAP2', hue='cell_type', palette='tab10', s=40, alpha=0.8)
+        for i, row in umap_df.iterrows():
+            ax2.text(row['UMAP1'] + 0.2, row['UMAP2'], row['sampleid'], fontsize=7, alpha=0.7)
+        plt.title("NMF-based UMAP Colored by Cell Type")
+        plt.xlabel("UMAP1")
+        plt.ylabel("UMAP2")
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', ncol=2)
+        plt.tight_layout()
+
+        # Save the figure with compression
+        plt.savefig(path_to_save_figure, dpi=200, bbox_inches='tight', format="pdf", pad_inches=0.9)
+        plt.close()
+    except Exception as e:
+        print(str(e))
+        print("Warning! Failed to run plot_NMFbased_UMAP. See above Exception.")
+
+
+## DEPRECATED VERSION WHERE I PLOT TWO DIFFERENT PLOTS
+def plot_NMFbased_UMAP_OG(basis_matrix, path_to_save_ctfigure, path_to_save_sifigure, n_U_neighbors=15):
+    """NMF/
+    Takes an NMF basis matrix (components x samples) and plots a UMAP with dots
+        colored by cell type and SampleID (each dot refers to a Diseased SampleID-CT pair for UDON)
+    Arguments
+    ---------
+    basis_matrix: Matrix where rows = NMF components and columns = samples from NMF
+        (e.g. basis_matrix output from clustering_wrapper)
+        NOTE: The sample names have to follow trend of CELLTYPE_SAMPLEID
+    path_to_save_figure: Path where figure will be saved as a pdf
+    n_U_neighbors: Value used as n_neighbors input for umap.UMAP
+    
+    Returns
+    ---------
+    None (plot)
+    """
+    try:
+        # Transpose basis matrix (components x samples) to make rows = samples
+        X = basis_matrix.T  # Now shape: (n_samples, n_components)   
+
+        # Extract cell types from sample names
+        umap_df = pd.DataFrame(X.index, columns=['sample'])
+        split_sample = umap_df['sample'].str.split('_')
+        umap_df['cell_type'] = split_sample.str[0] 
+        umap_df['sampleid'] = "_".join(split_sample.str[1], split_sample.str[2])
 
         # Run UMAP
         reducer = umap.UMAP(n_neighbors=n_U_neighbors, min_dist=0.1, metric='euclidean', random_state=42)
@@ -408,7 +464,22 @@ def plot_NMFbased_UMAP(basis_matrix, path_to_save_figure, n_U_neighbors=15):
         plt.tight_layout()
 
         # Save the figure with compression
-        plt.savefig(path_to_save_figure, dpi=200, bbox_inches='tight', format="pdf", pad_inches=0.9)
+        plt.savefig(path_to_save_ctfigure, dpi=200, bbox_inches='tight', format="pdf", pad_inches=0.9)
+        plt.close()
+
+        # now the patient
+        # Plot
+        plt.figure(figsize=(10, 6))
+        sns.scatterplot(data=umap_df, x='UMAP1', y='UMAP2', hue='sampleid', palette='tab10', s=40, alpha=0.8)
+        plt.title("NMF-based UMAP Colored by Cell Type")
+        plt.xlabel("UMAP1")
+        plt.ylabel("UMAP2")
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()
+
+        # Save the figure with compression
+        plt.savefig(path_to_save_sifigure, dpi=200, bbox_inches='tight', format="pdf", pad_inches=0.9)
+        plt.close()
     except Exception as e:
         print(str(e))
         print("Warning! Failed to run plot_NMFbased_UMAP. See above Exception.")
