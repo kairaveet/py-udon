@@ -366,15 +366,18 @@ def plot_markers_df_subplots(marker_heatmap, markers_df, clusters, groups_to_col
         print(str(e))
         print("Warning! Failed to run plot_markers_df. See above Exception.")
 
-def plot_NMFbased_UMAP(basis_matrix, path_to_save_figure, n_U_neighbors=15):
+def plot_NMFbased_UMAP(basis_matrix, clusters_clean, path_to_save_figure, n_U_neighbors=15):
     """NMF/
     Takes an NMF basis matrix (components x samples) and plots a UMAP with dots
-        colored by cell type and SampleID (each dot refers to a Diseased SampleID-CT pair for UDON)
+        colored by cluster, shape for cell type (each dot refers to a Diseased 
+        SampleID-CT pair for UDON)
     Arguments
     ---------
     basis_matrix: Matrix where rows = NMF components and columns = samples from NMF
         (e.g. basis_matrix output from clustering_wrapper)
         NOTE: The sample names have to follow trend of CELLTYPE_SAMPLEID
+    clusters_clean: Dataframe where rownames = Sample names as in columns of basis_matrix
+        and column called cluster indicates the UDON-based cluster
     path_to_save_figure: Path where figure will be saved as a pdf
     n_U_neighbors: Value used as n_neighbors input for umap.UMAP
     
@@ -391,7 +394,11 @@ def plot_NMFbased_UMAP(basis_matrix, path_to_save_figure, n_U_neighbors=15):
         split_sample = umap_df['sample'].str.split('__')
         umap_df['cell_type'] = split_sample.str[0] 
         umap_df['sampleid'] = split_sample.str[1] 
-        print(umap_df.iloc[0:4,])
+
+        # Add the clusters to the umap_df
+        clusters_clean.index.name = 'sample'
+        clusters_clean_reset = clusters_clean.reset_index()
+        umap_df = umap_df.merge(clusters_clean_reset[['sample', 'cluster']], on='sample', how='left')
 
         # Run UMAP
         reducer = umap.UMAP(n_neighbors=n_U_neighbors, min_dist=0.1, metric='euclidean', random_state=42)
@@ -403,10 +410,11 @@ def plot_NMFbased_UMAP(basis_matrix, path_to_save_figure, n_U_neighbors=15):
 
         # Plot
         plt.figure(figsize=(10, 6))
-        ax2 = sns.scatterplot(data=umap_df, x='UMAP1', y='UMAP2', hue='cell_type', palette='tab10', s=40, alpha=0.8)
+        ax2 = sns.scatterplot(data=umap_df, x='UMAP1', y='UMAP2', style='cell_type', 
+                              hue="cluster", palette='tab10', s=40, alpha=0.8)
         for i, row in umap_df.iterrows():
             ax2.text(row['UMAP1'] + 0.2, row['UMAP2'], row['sampleid'], fontsize=7, alpha=0.7)
-        plt.title("NMF-based UMAP Colored by Cell Type")
+        plt.title("NMF-based UMAP Colored by Cluster")
         plt.xlabel("UMAP1")
         plt.ylabel("UMAP2")
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', ncol=2)
