@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import fisher_exact
 from statsmodels.stats.multitest import multipletests
-from cmh import CMH
+#from cmh import CMH
 
 
 def make_mean_based_binary(df, cols_to_convert, direction='greater'):
@@ -32,7 +32,7 @@ def make_mean_based_binary(df, cols_to_convert, direction='greater'):
 
 
 ### HOPE's version
-def fishers_clinical_feats(udon_clusters, clinical_metadata_df, clinical_measure_key, p_val=0.1, n_samples=3, patient_key="HTB_ID"):
+def fishers_clinical_feats(udon_clusters, clinical_metadata_df, clinical_measure_key,  p_val=0.1, n_samples=3, patient_key="HTB_ID"):
     """
     Runs the fisher's test on binarized clinical data focusing on the clinical_measure_key
 
@@ -56,6 +56,10 @@ def fishers_clinical_feats(udon_clusters, clinical_metadata_df, clinical_measure
     print(clinical_measure_key, ":", len(udon_clusters["donors"].unique()) - len(udon_clusters_updated["donors"].unique()), "Patients could not be considered due to lack of clinical data, leaving", 
         len(udon_clusters_updated["donors"].unique()))
 
+    cell_types = udon_clusters_updated['cell_types'].unique()
+    cell_types.sort()#
+    clusters = udon_clusters_updated['cluster'].unique()
+
 
     # Initialize matrices for p-values and odds ratios
     p_val_matrix = pd.DataFrame(np.nan, index=cell_types, columns=clusters)
@@ -65,8 +69,8 @@ def fishers_clinical_feats(udon_clusters, clinical_metadata_df, clinical_measure
     for cluster in clusters:
         for cell_type in cell_types:
             # Subset data for the current cluster and other clusters
-            pseudobulks_in_cluster = udon_clusters[udon_clusters['cluster'] == cluster]
-            pseudobulks_in_other_clusters = udon_clusters[udon_clusters['cluster'] != cluster]
+            pseudobulks_in_cluster = udon_clusters_updated[udon_clusters_updated['cluster'] == cluster]
+            pseudobulks_in_other_clusters = udon_clusters_updated[udon_clusters_updated['cluster'] != cluster]
 
             # Compute the counts for the Fisher's test
             n_cm_ct_in_cluster = len(pseudobulks_in_cluster[(pseudobulks_in_cluster['clinical_measure'] == 1) & (pseudobulks_in_cluster['cell_types'] == cell_type)])
@@ -149,89 +153,90 @@ def get_binary_variable(metadata_df, clinical_measure_key, categorical_variables
 
     
 
-def cmh_clinical_feats(clinical_metadata_df, clinical_measure_key, batch_key, udon_clusters=None, adata=None, udon_clusters_key='udon_clusters', n_samples=3):
+# def cmh_clinical_feats(clinical_metadata_df, clinical_measure_key, batch_key, udon_clusters=None, adata=None, udon_clusters_key='udon_clusters', n_samples=3):
 
-    # Check input validity
-    if udon_clusters is None and adata is None:
-        raise ValueError("Either udon_clusters or adata must be provided.")
-    if udon_clusters is not None and adata is not None:
-        raise ValueError("Provide only one of udon_clusters or adata, not both.")
-    if adata is not None and udon_clusters_key is None:
-        raise ValueError("udon_cluster_key must be provided when adata is used.")
+#     # Check input validity
+#     if udon_clusters is None and adata is None:
+#         raise ValueError("Either udon_clusters or adata must be provided.")
+#     if udon_clusters is not None and adata is not None:
+#         raise ValueError("Provide only one of udon_clusters or adata, not both.")
+#     if adata is not None and udon_clusters_key is None:
+#         raise ValueError("udon_cluster_key must be provided when adata is used.")
 
-    # Get udon clusters depending on the input type
-    if adata is not None:
-        udon_clusters = adata.uns[udon_clusters_key]
+#     # Get udon clusters depending on the input type
+#     if adata is not None:
+#         udon_clusters = adata.uns[udon_clusters_key]
 
-    udon_clusters['cell_types'] = udon_clusters.index.str.split('__').str[0]
-    cell_types = udon_clusters['cell_types'].unique()
-    cell_types.sort()
-    clusters = udon_clusters['cluster'].unique()
-    udon_clusters['donors'] = udon_clusters.index.str.split('__').str[1]
+#     udon_clusters['cell_types'] = udon_clusters.index.str.split('__').str[0]
+#     cell_types = udon_clusters['cell_types'].unique()
+#     cell_types.sort()
+#     clusters = udon_clusters['cluster'].unique()
+#     udon_clusters['donors'] = udon_clusters.index.str.split('__').str[1]
 
-    # Remove rows with NA in the specified column
-    metadata_df = clinical_metadata_df.dropna(subset=clinical_measure_key, axis=0)
+#     # Remove rows with NA in the specified column
+#     metadata_df = clinical_metadata_df.dropna(subset=clinical_measure_key, axis=0)
 
-    # project the donor metadata to the udon clusters
-    # create donor to clinical measure dictionary
-    donor_to_clinical_measure = metadata_df[clinical_measure_key].to_dict()
-    donor_to_batch = metadata_df[batch_key].to_dict()
-    udon_clusters['clinical_measure'] = udon_clusters['donors'].map(donor_to_clinical_measure)
-    udon_clusters['batches'] = udon_clusters['donors'].map(donor_to_batch)
-    donor_to_batch = metadata_df[batch_key].to_dict()
-    udon_clusters['batches'] = udon_clusters['donors'].map(donor_to_batch)
+#     # project the donor metadata to the udon clusters
+#     # create donor to clinical measure dictionary
+#     donor_to_clinical_measure = metadata_df[clinical_measure_key].to_dict()
+#     donor_to_batch = metadata_df[batch_key].to_dict()
+#     udon_clusters['clinical_measure'] = udon_clusters['donors'].map(donor_to_clinical_measure)
+#     udon_clusters['batches'] = udon_clusters['donors'].map(donor_to_batch)
+#     donor_to_batch = metadata_df[batch_key].to_dict()
+#     udon_clusters['batches'] = udon_clusters['donors'].map(donor_to_batch)
 
-    batches = udon_clusters['batches'].unique()
+#     batches = udon_clusters['batches'].unique()
 
-    # Initialize matrices for p-values and odds ratios
-    p_val_matrix = pd.DataFrame(np.nan, index=cell_types, columns=clusters)
+#     # Initialize matrices for p-values and odds ratios
+#     p_val_matrix = pd.DataFrame(np.nan, index=cell_types, columns=clusters)
 
-    udon_clusters_og = udon_clusters.copy()
+#     udon_clusters_og = udon_clusters.copy()
 
-    for cluster in clusters:
-        for cell_type in cell_types:
-            print(cluster, cell_type)
-            contigencies = np.ndarray(shape=(2,2,2), dtype=int)
+#     for cluster in clusters:
+#         for cell_type in cell_types:
+#             print(cluster, cell_type)
+#             contigencies = np.ndarray(shape=(2,2,2), dtype=int)
 
-            for batch_component in batches:
-                udon_clusters = udon_clusters_og.copy()
-                print(batch_component)
+#             for batch_component in batches:
+#                 udon_clusters = udon_clusters_og.copy()
+#                 print(batch_component)
 
-                # limit analysis to the individual batch
-                udon_clusters = udon_clusters[udon_clusters['batches'] == batch_component]
+#                 # limit analysis to the individual batch
+#                 udon_clusters = udon_clusters[udon_clusters['batches'] == batch_component]
 
-                # Subset data
-                pseudobulks_in_cluster = udon_clusters[udon_clusters['cluster'] == cluster]
-                pseudobulks_in_other_clusters = udon_clusters[udon_clusters['cluster'] != cluster]
+#                 # Subset data
+#                 pseudobulks_in_cluster = udon_clusters[udon_clusters['cluster'] == cluster]
+#                 pseudobulks_in_other_clusters = udon_clusters[udon_clusters['cluster'] != cluster]
 
-                # Create contingency table
-                # Compute the counts for the Fisher's test
-                n_cm_ct_in_cluster = len(pseudobulks_in_cluster[(pseudobulks_in_cluster['clinical_measure'] == 1) & (pseudobulks_in_cluster['cell_types'] == cell_type)])
-                n_not_cm_ct_in_cluster = len(pseudobulks_in_cluster[(pseudobulks_in_cluster['clinical_measure'] == 0) & (pseudobulks_in_cluster['cell_types'] == cell_type)])
-                n_cm_ct_in_other_clusters = len(pseudobulks_in_other_clusters[(pseudobulks_in_other_clusters['clinical_measure'] == 1) & (pseudobulks_in_other_clusters['cell_types'] == cell_type)])
-                n_not_cm_ct_in_other_clusters = len(pseudobulks_in_other_clusters[(pseudobulks_in_other_clusters['clinical_measure'] == 0) & (pseudobulks_in_other_clusters['cell_types'] == cell_type)])
+#                 # Create contingency table
+#                 # Compute the counts for the Fisher's test
+#                 n_cm_ct_in_cluster = len(pseudobulks_in_cluster[(pseudobulks_in_cluster['clinical_measure'] == 1) & (pseudobulks_in_cluster['cell_types'] == cell_type)])
+#                 n_not_cm_ct_in_cluster = len(pseudobulks_in_cluster[(pseudobulks_in_cluster['clinical_measure'] == 0) & (pseudobulks_in_cluster['cell_types'] == cell_type)])
+#                 n_cm_ct_in_other_clusters = len(pseudobulks_in_other_clusters[(pseudobulks_in_other_clusters['clinical_measure'] == 1) & (pseudobulks_in_other_clusters['cell_types'] == cell_type)])
+#                 n_not_cm_ct_in_other_clusters = len(pseudobulks_in_other_clusters[(pseudobulks_in_other_clusters['clinical_measure'] == 0) & (pseudobulks_in_other_clusters['cell_types'] == cell_type)])
 
-                # Create a contingency table for Fisher's test
-                contigency_mat = np.array([[n_cm_ct_in_cluster, n_not_cm_ct_in_cluster],
-                                         [n_cm_ct_in_other_clusters, n_not_cm_ct_in_other_clusters]])
+#                 # Create a contingency table for Fisher's test
+#                 contigency_mat = np.array([[n_cm_ct_in_cluster, n_not_cm_ct_in_cluster],
+#                                          [n_cm_ct_in_other_clusters, n_not_cm_ct_in_other_clusters]])
 
-                contigencies[batch_component] = contigency_mat
+#                 contigencies[batch_component] = contigency_mat
 
-            # Determine if CMH or Fisher's test should be used
-            if np.shape(contigencies)[2] < 2 or np.any(contigencies[0, 0, :] < n_samples):
-                p_value = np.nan
-            else:
-                udon_clusters['cm_ct_binary'] = 'no'
-                udon_clusters.loc[(udon_clusters['clinical_measure'] == 1 & udon_clusters['cell_types'] == cell_type), 'cm_ct_binary'] = 'yes'
-                udon_clusters['cluster_binary'] = 'no'
-                udon_clusters.loc[udon_clusters['cluster'] == cluster, 'cluster_binary'] = 'yes'
+#             # Determine if CMH or Fisher's test should be used
+#             if np.shape(contigencies)[2] < 2 or np.any(contigencies[0, 0, :] < n_samples):
+#                 p_value = np.nan
+#             else:
+#                 udon_clusters['cm_ct_binary'] = 'no'
+#                 udon_clusters.loc[(udon_clusters['clinical_measure'] == 1 & udon_clusters['cell_types'] == cell_type), 'cm_ct_binary'] = 'yes'
+#                 udon_clusters['cluster_binary'] = 'no'
+#                 udon_clusters.loc[udon_clusters['cluster'] == cluster, 'cluster_binary'] = 'yes'
 
-                _, _, p_value = CMH(udon_clusters, 'cm_ct_binary', 'cluster_binary', stratifier='batches', raw=True)
+#                 _, _, p_value = CMH(udon_clusters, 'cm_ct_binary', 'cluster_binary', stratifier='batches', raw=True)
 
-            # Store results in matrices
-            p_val_matrix.at[cell_type, cluster] = p_value
+#             # Store results in matrices
+#             p_val_matrix.at[cell_type, cluster] = p_value
 
-    return p_val_matrix
+#     return p_val_matrix
+
 
 
 def fdr_correction(p_val_matrix, alpha=0.05, method='fdr_bh'):
