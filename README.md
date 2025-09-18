@@ -1,18 +1,69 @@
-# udon
-UDON is an unsupervised framework for defining disease subtypes from patient scRNA-seq data. It uses control-normalized pseudobulk expression and sparse NMF to identify stable cell-state perturbations. UDON includes SATAY-UDON for metadata enrichment and SASHIMI-UDON for cohorts with limited controls.
+# UDON: Unsupervised Discovery of Novel Disease Programs  
 
-# Steps for using this code
-SASHIMI-UDON files coming soon! 
+[![PyPI version](https://img.shields.io/pypi/v/py-udon.svg)](https://pypi.org/project/py-udon/)  
+[![Python versions](https://img.shields.io/pypi/pyversions/py-udon.svg)](https://pypi.org/project/py-udon/)  
+[![License](https://img.shields.io/github/license/kairaveet/py-udon)](LICENSE)  
 
-Note before starting: since it is in python, you will either need to convert your [Seurat object to h5ad](https://mojaveazure.github.io/seurat-disk/articles/convert-anndata.html) (or use the `sceasy` package) or create an h5ad/anndata object using the scanpy pipeline. Currently UDON supports only human data. Please reach out in the Github Issues if you have any other species data and I can help with setting up database for those species. 
- 
+**UDON** is a Python package for unsupervised discovery of disease subtypes from patient scRNA-seq data.  
+It leverages **control-normalized pseudobulk expression** and **sparse NMF** to identify stable cell-state perturbations.  
 
-1. Create a virtual environment using conda or pip.
-2. Install the `py-udon` package. Package can be found on PyPi. 
-   `pip install py-udon`
-3. Ensure you have the following packages (preferably with the versions mentioned) available in a virtual environment:  
- `scanpy=1.9.5 ; numpy=1.24.4 ; scikit-learn=1.3.0; pandas=2.1.0; nimfa=1.4.0 ; statsmodels=0.14.0; tqdm=4.66.1; time; seaborn=0.12.2; matplotlib.pyplot=3.7.2`
-4. Download the database files attached as zip file here. Please unzip the database folder and note the path to the folder and its contents. 
-4 .You can edit the run_example_dataset.py to include your data and run udon on it. 
-Note: if loading the anndata converted from Seurat object, it is important that adata.X have normalized data (achieved with `NormalizeData` function in Seurat or `sc.pp.normalize_total(adata, target_sum=1e4) ; sc.pp.log1p(adata)`) . The dataset I have shown in this script is for the SJIA cohort data in the paper whose h5 files are at: GSE207633
-5. Please review the metadata file [donor_metadata.xlsx](https://github.com/kairaveet/py-udon/blob/main/donor_metadata.xlsx) required for the above-mentioned script to ensure your metadata follows the same format.
+UDON includes:  
+- **SATAY-UDON** for metadata enrichment  
+- **SASHIMI-UDON** for cohorts with limited controls *(coming soon!)*  
+
+---
+
+
+
+## 🚀 Installation  
+
+Create a virtual environment and install UDON from PyPI:  
+
+```bash
+conda create -n udon_env python=3.10
+conda activate udon_env
+
+pip install py-udon
+```
+
+## 📂 Input Requirements  
+
+UDON currently supports **human scRNA-seq data**.  
+
+- If your data is in **Seurat**, convert it to `.h5ad` (AnnData) format using one of:  
+  - [`SeuratDisk`](https://mojaveazure.github.io/seurat-disk/articles/convert-anndata.html)  
+  - [`sceasy`](https://github.com/cellgeni/sceasy)  
+
+- Alternatively, generate an AnnData object directly using **Scanpy**.  
+
+👉 For **non-human datasets**, please reach out by opening a [GitHub issue](https://github.com/kairaveet/py-udon/issues).  
+I’ll help set up the appropriate database for your species.  
+
+---
+
+## 🛠 Usage and Documentation  
+
+1. **Download the database files**  
+   - Download the database files attached as zip file [here](https://github.com/kairaveet/py-udon/blob/main/udon-python.zip). 
+   - Please unzip the database folder and note the path to the folder and its contents. UDON requires access to this folder when running.  
+
+2. **Run the example dataset**  
+   - Download the example dataset: **SJIA cohort** ([GSE207633](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE207633))
+   - Tutorial can be found at [`run_example_dataset.py`](https://github.com/kairaveet/py-udon/blob/main/run_example_dataset.py)
+
+3. **Ensure input normalization**  
+   UDON expects normalized expression values in `adata.X`.  
+   - In a **Seurat object**:  
+     ```R
+     NormalizeData(object)
+     ```  
+   - In an **Scanpy h5ad**:  
+     ```python
+     sc.pp.normalize_total(adata, target_sum=1e4)
+     sc.pp.log1p(adata)
+     ```  
+
+4. **Prepare donor metadata**  
+   - UDON requires a donor-level metadata file.  
+   - Example: [`donor_metadata.xlsx`](https://github.com/kairaveet/py-udon/blob/main/donor_metadata.xlsx)  
+   - Make sure your metadata follows this structure.  
