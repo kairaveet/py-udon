@@ -1,8 +1,4 @@
-# UDON: Unsupervised Discovery of Novel Disease Programs  
-
-[![PyPI version](https://img.shields.io/pypi/v/py-udon.svg)](https://pypi.org/project/py-udon/)  
-[![Python versions](https://img.shields.io/pypi/pyversions/py-udon.svg)](https://pypi.org/project/py-udon/)  
-[![License](https://img.shields.io/github/license/kairaveet/py-udon)](LICENSE)  
+# UDON: Unsupervised Discovery of Novel Disease Programs
 
 **UDON** is a Python package for unsupervised discovery of disease subtypes from patient scRNA-seq data.  
 It leverages **control-normalized pseudobulk expression** and **sparse NMF** to identify stable cell-state perturbations.  
@@ -11,9 +7,8 @@ UDON includes:
 - **SATAY-UDON** for metadata enrichment  
 - **SASHIMI-UDON** for cohorts with limited controls *(coming soon!)*  
 
+![Overview of UDON Toolkit](udon_toolkit_overview.png)
 ---
-
-
 
 ## 🚀 Installation  
 
@@ -36,7 +31,7 @@ UDON currently supports **human scRNA-seq data**.
 
 - Alternatively, generate an AnnData object directly using **Scanpy**.  
 
-👉 For **non-human datasets**, please reach out by opening a [GitHub issue](https://github.com/kairaveet/py-udon/issues).  
+- For **non-human datasets**, please reach out by opening a [GitHub issue](https://github.com/kairaveet/py-udon/issues).  
 I’ll help set up the appropriate database for your species.  
 
 ---
