@@ -31,8 +31,7 @@ UDON currently supports **human scRNA-seq data**.
 
 - Alternatively, generate an AnnData object directly using **Scanpy**.  
 
-- For **non-human datasets**, please reach out by opening a [GitHub issue](https://github.com/kairaveet/py-udon/issues).  
-I’ll help set up the appropriate database for your species.  
+- For **non-human datasets**, please reach out by opening a [GitHub issue](https://github.com/kairaveet/py-udon/issues). I’ll help set up the appropriate database for your species.  
 
 ---
 
