@@ -23,7 +23,7 @@ pip install py-udon
 
 ## 📂 Input Requirements  
 
-UDON currently supports **human scRNA-seq data**.  
+UDON currently supports h5ad format and **human scRNA-seq data**.  
 
 - If your data is in **Seurat**, convert it to `.h5ad` (AnnData) format using one of:  
   - [`SeuratDisk`](https://mojaveazure.github.io/seurat-disk/articles/convert-anndata.html)  

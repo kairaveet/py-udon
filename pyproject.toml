@@ -6,25 +6,26 @@ build-backend = "setuptools.build_meta"
 py-modules = []
 
 [project]
-name = "subsplice"
+name = "py-udon"
 version = "0.0.0"
 dependencies = [
-  "pandas>=2.2.2",
-  "scipy>=1.15.0",
-  "numpy==2.2.6",
-  "scikit-learn==1.6.0",
-  "nimfa",
-  "seaborn==0.13.0",
-  "statsmodels==0.14.0",
-  "matplotlib==3.10.5",
-  "scikit-dimension"
+  "scanpy=1.9.5",
+  "numpy=1.24.4",
+  "scikit-learn=1.3.0",
+  "pandas=2.1.0",
+  "nimfa=1.4.0",
+  "statsmodels=0.14.0",
+  "tqdm=4.66.1",
+  "time",
+  "seaborn=0.12.2",
+  "matplotlib.pyplot=3.7.2"
 ]
 requires-python = ">=3.10"
 authors = [
   {name = "Kairavee Thakkar", email = "kairavee.thakkar@cchmc.org"},
   {name = "Nathan Salomonis", email = "nathan.salomonis@cchmc.org"}
 ]
-description = "Subtype Discovery using Splicing"
+description = "Unsupervised Discovery of Novel Disease Programs"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
@@ -34,8 +35,8 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/kairaveet/spectra"
-Issues = "https://github.com/kairaveet/spectra/issues"
+Repository = "https://github.com/kairaveet/py-udon"
+Issues = "https://github.com/kairaveet/py-udon/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
