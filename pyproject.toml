@@ -6,18 +6,20 @@ build-backend = "setuptools.build_meta"
 py-modules = []
 
 [project]
-name = "py-udon"
-version = "0.0.2"
+name = "pyudon"
+version = "0.0.4"
 dependencies = [
   "scanpy==1.9.5",
-  "numpy==2.1.0",
+  "numpy==1.24.4",
   "scikit-learn==1.3.0",
   "pandas==2.1.0",
   "nimfa==1.4.0",
   "statsmodels==0.14.0",
   "tqdm==4.66.1",
   "seaborn==0.12.2",
-  "matplotlib==3.7.2"
+  "matplotlib==3.7.2",
+  "pooch",
+  "tarfile"
 ]
 requires-python = ">=3.10"
 authors = [
@@ -34,8 +36,8 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/kairaveet/py-udon"
-Issues = "https://github.com/kairaveet/py-udon/issues"
+Repository = "https://github.com/kairaveet/pyudon"
+Issues = "https://github.com/kairaveet/pyudon/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

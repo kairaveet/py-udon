@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from scipy.stats import fisher_exact
 from statsmodels.stats.multitest import multipletests
-from cmh import CMH
 
 
 def make_mean_based_binary(df, cols_to_convert, direction='greater'):

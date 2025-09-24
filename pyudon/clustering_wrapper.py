@@ -1,9 +1,9 @@
 import os
 import time
-from nmf import *
-from metadata_analysis import *
-from linearSVM import *
-from feature_selection import *
+from .nmf import *
+from .metadata_analysis import *
+from .linearSVM import *
+from .feature_selection import *
 
 
 def clustering_wrapper(adata, output_filename, rank=None, min_group_size=3, top_n_genes=60, rho_threshold=0.2, marker_finder_rho=0.2, write_files=True):

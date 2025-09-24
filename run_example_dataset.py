@@ -1,17 +1,8 @@
 # load udon scripts
-from pre_process import *
-from feature_selection import *
-from clustering_wrapper import *
-from enrichment_pathwaycommons import *
-from visualizations import *
-
-# load packages for udon 
-import scanpy as sc
-import time
-import os
+import pyudon
 
 # load packages for satay-udon
-from satay_udon import *
+import scanpy as sc
 import pandas as pd
 import os
 import seaborn as sns
