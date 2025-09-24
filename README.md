@@ -63,11 +63,6 @@ You can download the dataset either from GEO as a set of individual sample h5 fi
 4. **Determine control-like cells using SASHIMI-UDON module in absence of control data**
 
 <p align="center">
-  <a href="https://mapmyvisitors.com/web/1bzku">
-     <img width="200" src="https://mapmyvisitors.com/map.png?d=2lii7u4aMjVwFilH5T7yLnFPR5XJ75oXRC_8-Qke7F4&cl=ffffff" />
-   </a>
-</p>
-<p align="center">
   <a href="#">
      <img src="https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2Fkairaveet%2Fpyudon&countColor=%23ba68c8" />
    </a>
